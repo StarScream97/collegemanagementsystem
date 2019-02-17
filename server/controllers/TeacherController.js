@@ -81,34 +81,39 @@ Router.post('/update',async(req,res)=>{
     
 })
 
-
-// Add Students
-Router.post('/addstudents',async(req,res)=>{
-    const {teacherId,studentId,subjectIds}=req.body;
-
-    const teacher=await TeacherSchema.findById(teacherId);
-    studentIds.map(stdId=>{
-        teacher.students.push(stdId);
-        // const student=await StudentSchema.findById(stdId);
-        StudentSchema.findById(stdId).then((err,student)=>{
-            student.teachers.push(teacherId);
-            student.subjects.push(subjectId);
-            student.save().then(()=>{
-
-            });
-        });
-        
-    });
-
-    // const result=await teacher.save();
-    try {
-        const result=await teacher.save();
-        return res.status(200).send(result);
-    } catch (error) {
-        return res.send({error})
-    }
-    // return res.status(200).send('Students Added Successfully');
+// Fetch All Students
+Router.get('/students',async(req,res)=>{
+    const students=await StudentSchema.find({});
+    return res.status(200).send(students);
 })
+
+// Assign subject to Students
+Router.post('/addstudents',async(req,res)=>{
+    const {teacherId,studentIds,subjectId}=req.body;
+    const teacher=await TeacherSchema.findById(teacherId);
+   
+
+    Promise.all(studentIds.map(function(id) { 
+        StudentSchema.findById(id).then((val)=>{
+            val.subjects.push(subjectId);
+            addStudentInTeacher(val,teacher)
+        });
+    }))
+    return res.status(200).send('Subjects assigned to students successfully!');            
+})
+
+async function addStudentInTeacher(student,teacher){
+    try {
+        teacher.students.push(student._id);
+        await teacher.save();
+        await student.save();
+    } catch (error) {
+        
+    }
+
+    
+    
+}
 
 
 

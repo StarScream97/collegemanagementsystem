@@ -98,5 +98,28 @@ Router.post('/subject/create',async(req,res)=>{
     }
 })
 
+// Fetch Subjects
+Router.get('/subjects',async(req,res)=>{
+    const subjects=await SubjectSchema.find({});
+    return res.status(200).send(subjects);
+})
+
+// Accept Teacher Signup Request
+Router.post('/teachers/accept/:teacherId',async(req,res)=>{
+    const teacher=await TeacherSchema.findById(req.params.teacherId);
+    if(teacher){
+        teacher.isAccepted=true;
+        try {
+            const result=await teacher.save();
+            return res.status(200).send(result);
+        } catch (error) {
+            return res.status(400).send({
+                error
+            })
+        }
+    }
+})
+
+
 
 module.exports=Router;
