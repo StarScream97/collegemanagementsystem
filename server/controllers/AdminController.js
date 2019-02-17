@@ -9,6 +9,33 @@ const Router=express.Router();
 
 const bcrypt=require('bcrypt-nodejs');
 
+const multer=require('multer');
+
+const fileStorage=multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'uploads');
+    },
+    filename:function(req,file,cb){
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==='image/jpeg' || file.mimetype==='image/png'){
+        cb(null,true);
+    }else{
+        cb(null,false);
+    }
+}
+
+const upload=multer({
+    storage:fileStorage,
+    limits:{
+        fileSize:1024*1024*4
+    },
+    fileFilter:fileFilter
+});
+
 // Edit Teacher
 Router.post('/teachers/update',async(req,res)=>{
     const {adminId,teacherId,salary,teachingExperience,isAccepted,adminPassword}=req.body;
@@ -46,7 +73,7 @@ Router.post('/teachers/update',async(req,res)=>{
 
 
 // Admin Signup
-Router.post('/signup',async(req,res)=>{
+Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     const {name,email,password,profileImage,age,address,phone}=req.body;
     const salt=bcrypt.genSaltSync(12);
     const hashedPassword=await bcrypt.hashSync(password,salt);

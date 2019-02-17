@@ -4,7 +4,36 @@ const TeacherSchema=require('../models/teacher');
 const StudentSchema=require('../models/student');
 
 const bcrypt=require('bcrypt-nodejs');
+const multer=require('multer');
+
+const fileStorage=multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'uploads');
+    },
+    filename:function(req,file,cb){
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==='image/jpeg' || file.mimetype==='image/png'){
+        cb(null,true);
+    }else{
+        cb(null,false);
+    }
+}
+
+const upload=multer({
+    storage:fileStorage,
+    limits:{
+        fileSize:1024*1024*4
+    },
+    fileFilter:fileFilter
+});
+
+
 const Router=express.Router();
+
 
 Router.get('/',async(req,res)=>{
     // res.send('Hello Users');
@@ -12,28 +41,65 @@ Router.get('/',async(req,res)=>{
     res.send(teachers);
 })
 
+// Teacher Login
+Router.post('/login',async(req,res)=>{
+    const {email,password}=req.body;
+        
+    
+    try {
+        const teacher=await TeacherSchema.findOne({'email':email});
+        if(teacher){
+            console.log(teacher)
+            const passwordMatches=bcrypt.compareSync(password,teacher.password);
+            console.log(passwordMatches)
+            if(passwordMatches){
+                return res.status(200).send(teacher);
+            } else{
+                return res.status(400).send({
+                    error:"Invalid Credentials! Please try again"
+                })
+            }
+        }
+        else{
+            return res.status(400).send({
+                error:"Invalid Credentials! Please try again"
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+
+})
+
 // Signup new teacher
-Router.post('/signup',async(req,res)=>{
+Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     let {name, email , password, profileImage, age, address, phone, teachingExperience, levelOfStudy}=req.body;
 
-    const salt=await bcrypt.genSaltSync(12);
-    const hashedPassword=bcrypt.hashSync(password,salt);
+    const alreadyPresentTeacher=await TeacherSchema.findOne({'email':email});
+    if(alreadyPresentTeacher){
+        return res.status(400).send({
+            error:"User with that email already exists! Please choose different email"
+        })
+    }
+    else{
+        const salt=await bcrypt.genSaltSync(12);
+        const hashedPassword=bcrypt.hashSync(password,salt);
 
-
-
-    let teacher=new TeacherSchema({
-        name,
-        email,
-        password:hashedPassword,
-        profileImage,
-        age,
-        address,
-        phone,
-        teachingExperience,
-        levelOfStudy
-    })
-    const result=await teacher.save();
-    return res.status(200).send(result);
+        let teacher=new TeacherSchema({
+            name,
+            email,
+            password:hashedPassword,
+            profileImage:req.file.path,
+            age,
+            address,
+            phone,
+            teachingExperience,
+            levelOfStudy
+        })
+        const result=await teacher.save();
+        return res.status(200).send(result);
+    }
+    
 
 
 })

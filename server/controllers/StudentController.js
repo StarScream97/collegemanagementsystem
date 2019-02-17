@@ -6,32 +6,95 @@ const Router=express.Router();
 
 const bcrypt=require('bcrypt-nodejs');
 
+const multer=require('multer');
+
+const fileStorage=multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'uploads');
+    },
+    filename:function(req,file,cb){
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==='image/jpeg' || file.mimetype==='image/png'){
+        cb(null,true);
+    }else{
+        cb(null,false);
+    }
+}
+
+const upload=multer({
+    storage:fileStorage,
+    limits:{
+        fileSize:1024*1024*4
+    },
+    fileFilter:fileFilter
+});
+
+
+// Student Login
+Router.post('/login',async(req,res)=>{
+    const {email,password}=req.body;
+    
+    try {
+        const student=await StudentSchema.find({'email':email});        
+        if(student){
+            const passwordMatches=bcrypt.compareSync(password,student.password);
+            console.log(passwordMatches)
+            if(passwordMatches){
+                return res.status(200).send(student);
+            } else{
+                return res.status(400).send({
+                    error:"Invalid Credentials! Please try again"
+                })
+            }
+        }
+        else{
+            return res.status(400).send({
+                error:"Invalid Credentials! Please try again"
+            })
+        }
+    } catch (error) {
+        
+    }
+})
 
 // Add Student
-Router.post('/signup',async(req,res)=>{
+Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     const {name,email,password,phone,profileImage,age,address,semester} = req.body;
+    const alreadyPresentEmail=await StudentSchema.findOne({'email':email});
 
-    const salt=bcrypt.genSaltSync(12);
-    const hashedPassword=bcrypt.hashSync(password,salt);
-    const student=new StudentSchema({
-        name,
-        email,
-        password:hashedPassword,
-        profileImage,
-        age,
-        address,
-        phone,
-        semester
-    });
-
-    student.save(function(err){
-        if(err){
-            return res.status(400).send(err);
-        }
-       return res.status(200).send({
-            data:student
+    if(alreadyPresentEmail){
+        return res.status(400).send({
+            error:"User with that email already exists! Please choose different email"
         })
-    })
+    }
+    else{
+        const salt=bcrypt.genSaltSync(12);
+        const hashedPassword=bcrypt.hashSync(password,salt);
+        const student=new StudentSchema({
+            name,
+            email,
+            password:hashedPassword,
+            profileImage,
+            age,
+            address,
+            phone,
+            semester
+        });
+
+        student.save(function(err){
+            if(err){
+                return res.status(400).send(err);
+            }
+            return res.status(200).send({
+                data:student
+            })
+        })
+    }
+    
 
 
 })
