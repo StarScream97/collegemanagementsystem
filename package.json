@@ -1,0 +1,19 @@
+{
+  "name": "ims",
+  "version": "1.0.0",
+  "description": "Institute Management System",
+  "main": "index.js",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.13"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "server": "nodemon ./server/index"
+  },
+  "author": "Manish Karki",
+  "license": "ISC"
+}
