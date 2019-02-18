@@ -18,7 +18,7 @@ const student=new Schema({
     },
     profileImage:{
         type:String,
-        default:'asd.jpg'
+        default:''
     },
     age:{
         type:String,
@@ -37,8 +37,7 @@ const student=new Schema({
         default:false
     },
     semester:{
-        type:String,
-        required:true
+        type:String
     },
     subjects:[
         {

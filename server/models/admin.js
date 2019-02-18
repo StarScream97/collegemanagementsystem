@@ -17,7 +17,7 @@ const admin=new Schema({
     },
     profileImage:{
         type:String,
-        default:'asd.jpg'
+        default:''
     },
     age:{
         type:Number,

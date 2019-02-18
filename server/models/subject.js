@@ -19,7 +19,7 @@ const subject=new Schema({
         type:Number,
         required:true
     },
-    teacher:{
+    teacherId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Teacher'
     }

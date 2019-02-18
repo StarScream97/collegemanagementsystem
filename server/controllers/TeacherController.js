@@ -40,20 +40,16 @@ const Router=express.Router();
 Router.get('/',async(req,res)=>{
     // res.send('Hello Users');
     const teachers=await TeacherSchema.find({});
-    res.send(teachers);
+    return res.send(teachers);
 })
 
 // Teacher Login
 Router.post('/login',async(req,res)=>{
-    const {email,password}=req.body;
-        
-    
+    const {email,password}=req.body; 
     try {
         const teacher=await TeacherSchema.findOne({'email':email});
         if(teacher){
-            console.log(teacher)
             const passwordMatches=bcrypt.compareSync(password,teacher.password);
-            console.log(passwordMatches)
             if(passwordMatches){
                 return res.status(200).send(teacher);
             } else{
@@ -127,13 +123,6 @@ Router.post('/update',upload.single('profileImage'),async(req,res)=>{
         if(teacher){
             const passwordMatches=bcrypt.compareSync(password,teacher.password);
             if(passwordMatches){
-                // if(profileImage) {
-                //     fs.unlink(teacher.profileImage,(err)=>{
-                //         if(err)
-                //             console.log(err);
-                //     })
-                //     teacher.profileImage=req.file.path;
-                // }
 
                 if(profileImage){
                     if(teacher.profileImage===''){
