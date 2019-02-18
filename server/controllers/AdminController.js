@@ -103,6 +103,7 @@ Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     }
 })
 
+
 // Create Subject
 Router.post('/subject/create',async(req,res)=>{
     const {name,semester,fullMarks,passMarks,teacher}=req.body;

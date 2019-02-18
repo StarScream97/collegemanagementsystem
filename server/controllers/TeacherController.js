@@ -1,7 +1,9 @@
 const express=require('express');
 // const mongoose=require('mongoose');
+const fs=require('fs');
 const TeacherSchema=require('../models/teacher');
 const StudentSchema=require('../models/student');
+const TeacherValidator=require('../validation/teacherValidation');
 
 const bcrypt=require('bcrypt-nodejs');
 const multer=require('multer');
@@ -55,15 +57,11 @@ Router.post('/login',async(req,res)=>{
             if(passwordMatches){
                 return res.status(200).send(teacher);
             } else{
-                return res.status(400).send({
-                    error:"Invalid Credentials! Please try again"
-                })
+                return res.status(400).send("Invalid Credentials! Please try again")
             }
         }
         else{
-            return res.status(400).send({
-                error:"Invalid Credentials! Please try again"
-            })
+            return res.status(400).send("Invalid Credentials! Please try again");
         }
     } catch (error) {
         console.log(error)
@@ -74,12 +72,12 @@ Router.post('/login',async(req,res)=>{
 // Signup new teacher
 Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     let {name, email , password, profileImage, age, address, phone, teachingExperience, levelOfStudy}=req.body;
+    const {error}=TeacherValidator(req.body);
+    if(error) return res.send(error.details[0].message);
 
     const alreadyPresentTeacher=await TeacherSchema.findOne({'email':email});
     if(alreadyPresentTeacher){
-        return res.status(400).send({
-            error:"User with that email already exists! Please choose different email"
-        })
+        return res.status(400).send("User with that email already exists! Please choose different email");
     }
     else{
         const salt=await bcrypt.genSaltSync(12);
@@ -110,40 +108,63 @@ Router.get('/fetch/:email',async(req,res)=>{
     if(teacher){
         return res.status(200).send(teacher);
     }else{
-        return res.status(400).send({
-            error:"Couldn't find anyone with the provided email"
-        })
+        return res.status(400).send("Couldn't find anyone with the provided email");
     }
 })
 
+// Fetch all teachers
+Router.get('/',async(req,res)=>{
+    const teachers=await TeacherSchema.find({});
+    return res.send(teachers);
+})
+
 // Update Teacher Detail
-Router.post('/update',async(req,res)=>{
-    let {profileImage,password,newPassword,age,address,email,phone}=req.body;
-    let teacher=await TeacherSchema.findOne({'email':email});
-    if(teacher){
-        let passwordMatches=bcrypt.compareSync(password,teacher.password);
-        if(passwordMatches){
-            if(profileImage) teacher.profileImage=profileImage;
-            if(age) teacher.age=age;
-            if(address) teacher.address=address;
-            if(email) teacher.email=email;
-            if(phone) teacher.phone=phone;
+Router.post('/update',upload.single('profileImage'),async(req,res)=>{
+    const {teacherId,email,password,newPassword,age,address,phone}=req.body;
+    const profileImage=req.file;
+    try {
+        let teacher=await TeacherSchema.findById(teacherId);
+        if(teacher){
+            const passwordMatches=bcrypt.compareSync(password,teacher.password);
+            if(passwordMatches){
+                // if(profileImage) {
+                //     fs.unlink(teacher.profileImage,(err)=>{
+                //         if(err)
+                //             console.log(err);
+                //     })
+                //     teacher.profileImage=req.file.path;
+                // }
 
-            if(newPassword){
-                const salt=bcrypt.genSaltSync(12);      
-                const hashedPassword=bcrypt.hashSync(newPassword,salt);
-                teacher.password=hashedPassword;
+                if(profileImage){
+                    if(teacher.profileImage===''){
+                        teacher.profileImage=req.file.path
+                    }else{
+                        fs.unlinkSync(teacher.profileImage);
+                        teacher.profileImage=req.file.path;
+                    }
+                }
+
+                if(age) teacher.age=age;
+                if(address) teacher.address=address;
+                if(email) teacher.email=email;
+                if(phone) teacher.phone=phone;
+
+                if(newPassword){
+                    const salt=bcrypt.genSaltSync(12);      
+                    const hashedPassword=bcrypt.hashSync(newPassword,salt);
+                    teacher.password=hashedPassword;
+                }
+
+                const result=await teacher.save();
+                return res.status(200).send(result);
             }
-
-            const result=await teacher.save();
-            return res.status(200).send(result);
+        
         }
-      
-    }else{
-        return res.status(400).send({
-            error:"Couldn't Update. Please Try Again Later"
-        })
+    } catch (error) {
+        // return res.status(400).send("Couldn't Update. Please Try Again Later");        
+        console.log(error)
     }
+    
     
 })
 
