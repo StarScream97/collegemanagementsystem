@@ -46,6 +46,10 @@ const teacher=new Schema({
         type:Boolean,
         default:false
     },
+    status:{
+        type:String,
+        default:"Teacher"
+    },
     students:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Student'
@@ -54,6 +58,12 @@ const teacher=new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Subject'
     }],
+    posts:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Post'
+        }
+    ]
 })
 
 module.exports=new mongoose.model('Teacher',teacher);

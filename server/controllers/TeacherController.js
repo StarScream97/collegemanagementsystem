@@ -1,62 +1,66 @@
-const express=require('express');
+const express = require('express');
 // const mongoose=require('mongoose');
-const fs=require('fs');
-const TeacherSchema=require('../models/teacher');
-const StudentSchema=require('../models/student');
-const TeacherValidator=require('../validation/teacherValidation');
+const fs = require('fs');
+const TeacherSchema = require('../models/teacher');
+const StudentSchema = require('../models/student');
+const TeacherValidator = require('../validation/teacherValidation');
 
-const bcrypt=require('bcrypt-nodejs');
-const multer=require('multer');
+const bcrypt = require('bcrypt-nodejs');
+const multer = require('multer');
 
-const fileStorage=multer.diskStorage({
-    destination:function(req,file,cb){
-        cb(null,'uploads');
+const fileStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
     },
-    filename:function(req,file,cb){
+    filename: function (req, file, cb) {
         cb(null, new Date().toISOString() + '-' + file.originalname);
     }
 });
 
-const fileFilter=(req,file,cb)=>{
-    if(file.mimetype==='image/jpeg' || file.mimetype==='image/png'){
-        cb(null,true);
-    }else{
-        cb(null,false);
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true);
+    } else {
+        cb(null, false);
     }
 }
 
-const upload=multer({
-    storage:fileStorage,
-    limits:{
-        fileSize:1024*1024*4
+const upload = multer({
+    storage: fileStorage,
+    limits: {
+        fileSize: 1024 * 1024 * 4
     },
-    fileFilter:fileFilter
+    fileFilter: fileFilter
 });
 
 
-const Router=express.Router();
+const Router = express.Router();
 
 
-Router.get('/',async(req,res)=>{
+Router.get('/', async (req, res) => {
     // res.send('Hello Users');
-    const teachers=await TeacherSchema.find({});
+    const teachers = await TeacherSchema.find({});
     return res.send(teachers);
 })
 
 // Teacher Login
-Router.post('/login',async(req,res)=>{
-    const {email,password}=req.body; 
+Router.post('/login', async (req, res) => {
+    const {
+        email,
+        password
+    } = req.body;
     try {
-        const teacher=await TeacherSchema.findOne({'email':email});
-        if(teacher){
-            const passwordMatches=bcrypt.compareSync(password,teacher.password);
-            if(passwordMatches){
+        const teacher = await TeacherSchema.findOne({
+            'email': email
+        });
+        if (teacher) {
+            const passwordMatches = bcrypt.compareSync(password, teacher.password);
+            if (passwordMatches) {
                 return res.status(200).send(teacher);
-            } else{
+            } else {
                 return res.status(400).send("Invalid Credentials! Please try again")
             }
-        }
-        else{
+        } else {
             return res.status(400).send("Invalid Credentials! Please try again");
         }
     } catch (error) {
@@ -66,131 +70,160 @@ Router.post('/login',async(req,res)=>{
 })
 
 // Signup new teacher
-Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
-    let {name, email , password, profileImage, age, address, phone, teachingExperience, levelOfStudy}=req.body;
-    const {error}=TeacherValidator(req.body);
-    if(error) return res.send(error.details[0].message);
+Router.post('/signup', upload.single('profileImage'), async (req, res) => {
+    let {
+        name,
+        email,
+        password,
+        profileImage,
+        age,
+        address,
+        phone,
+        teachingExperience,
+        levelOfStudy
+    } = req.body;
+    const {
+        error
+    } = TeacherValidator(req.body);
+    if (error) return res.send(error.details[0].message);
 
-    const alreadyPresentTeacher=await TeacherSchema.findOne({'email':email});
-    if(alreadyPresentTeacher){
+    const alreadyPresentTeacher = await TeacherSchema.findOne({
+        'email': email
+    });
+    if (alreadyPresentTeacher) {
         return res.status(400).send("User with that email already exists! Please choose different email");
-    }
-    else{
-        const salt=await bcrypt.genSaltSync(12);
-        const hashedPassword=bcrypt.hashSync(password,salt);
+    } else {
+        const salt = await bcrypt.genSaltSync(12);
+        const hashedPassword = bcrypt.hashSync(password, salt);
 
-        let teacher=new TeacherSchema({
+        let teacher = new TeacherSchema({
             name,
             email,
-            password:hashedPassword,
-            profileImage:req.file.path,
+            password: hashedPassword,
+            profileImage: req.file.path,
             age,
             address,
             phone,
             teachingExperience,
             levelOfStudy
         })
-        const result=await teacher.save();
+        const result = await teacher.save();
         return res.status(200).send(result);
     }
-    
+
 
 
 })
 
+
+
 // Fetch Teacher Detail
-Router.get('/fetch/:email',async(req,res)=>{
-    let teacher=await TeacherSchema.findOne({'email':req.params.email});
-    if(teacher){
+Router.get('/fetch/:email', async (req, res) => {
+    let teacher = await TeacherSchema.findOne({
+        'email': req.params.email
+    });
+    if (teacher) {
         return res.status(200).send(teacher);
-    }else{
+    } else {
         return res.status(400).send("Couldn't find anyone with the provided email");
     }
 })
 
 // Fetch all teachers
-Router.get('/',async(req,res)=>{
-    const teachers=await TeacherSchema.find({});
+Router.get('/', async (req, res) => {
+    const teachers = await TeacherSchema.find({});
     return res.send(teachers);
 })
 
 // Update Teacher Detail
-Router.post('/update',upload.single('profileImage'),async(req,res)=>{
-    const {teacherId,email,password,newPassword,age,address,phone}=req.body;
-    const profileImage=req.file;
+Router.post('/update', upload.single('profileImage'), async (req, res) => {
+    const {
+        teacherId,
+        email,
+        password,
+        newPassword,
+        age,
+        address,
+        phone
+    } = req.body;
+    const profileImage = req.file;
     try {
-        let teacher=await TeacherSchema.findById(teacherId);
-        if(teacher){
-            const passwordMatches=bcrypt.compareSync(password,teacher.password);
-            if(passwordMatches){
+        let teacher = await TeacherSchema.findById(teacherId);
+        if (teacher) {
+            const passwordMatches = bcrypt.compareSync(password, teacher.password);
+            if (passwordMatches) {
 
-                if(profileImage){
-                    if(teacher.profileImage===''){
-                        teacher.profileImage=req.file.path
-                    }else{
+                if (profileImage) {
+                    if (teacher.profileImage === '') {
+                        teacher.profileImage = req.file.path
+                    } else {
                         fs.unlinkSync(teacher.profileImage);
-                        teacher.profileImage=req.file.path;
+                        teacher.profileImage = req.file.path;
                     }
                 }
 
-                if(age) teacher.age=age;
-                if(address) teacher.address=address;
-                if(email) teacher.email=email;
-                if(phone) teacher.phone=phone;
+                if (age) teacher.age = age;
+                if (address) teacher.address = address;
+                if (email) teacher.email = email;
+                if (phone) teacher.phone = phone;
 
-                if(newPassword){
-                    const salt=bcrypt.genSaltSync(12);      
-                    const hashedPassword=bcrypt.hashSync(newPassword,salt);
-                    teacher.password=hashedPassword;
+                if (newPassword) {
+                    const salt = bcrypt.genSaltSync(12);
+                    const hashedPassword = bcrypt.hashSync(newPassword, salt);
+                    teacher.password = hashedPassword;
                 }
 
-                const result=await teacher.save();
+                const result = await teacher.save();
                 return res.status(200).send(result);
             }
-        
+
         }
     } catch (error) {
         // return res.status(400).send("Couldn't Update. Please Try Again Later");        
         console.log(error)
     }
-    
-    
+
+
 })
 
 // Fetch All Students
-Router.get('/students',async(req,res)=>{
-    const students=await StudentSchema.find({});
+Router.get('/students', async (req, res) => {
+    const students = await StudentSchema.find({});
     return res.status(200).send(students);
 })
 
 // Assign subject to Students
-Router.post('/addstudents',async(req,res)=>{
-    const {teacherId,studentIds,subjectId}=req.body;
-    const teacher=await TeacherSchema.findById(teacherId);
-   
+Router.post('/addstudents', async (req, res) => {
+    const {
+        teacherId,
+        studentIds,
+        subjectId
+    } = req.body;
+    const teacher = await TeacherSchema.findById(teacherId);
 
-    Promise.all(studentIds.map(function(id) { 
-        StudentSchema.findById(id).then((val)=>{
+
+    Promise.all(studentIds.map(function (id) {
+        StudentSchema.findById(id).then((val) => {
             val.subjects.push(subjectId);
-            addStudentInTeacher(val,teacher)
+            addStudentInTeacher(val, teacher)
         });
     }))
-    return res.status(200).send('Subjects assigned to students successfully!');            
+    return res.status(200).send('Subjects assigned to students successfully!');
 })
 
-async function addStudentInTeacher(student,teacher){
+async function addStudentInTeacher(student, teacher) {
     try {
         teacher.students.push(student._id);
         await teacher.save();
         await student.save();
     } catch (error) {
-        
+
     }
 
-    
-    
+
+
 }
 
 
 
-module.exports=Router;
+module.exports = Router;

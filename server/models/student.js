@@ -9,7 +9,6 @@ const student=new Schema({
     },
     email:{
         type:String,
-        required:true,
         unique:true
     },
     password:{
@@ -37,8 +36,19 @@ const student=new Schema({
         default:false
     },
     semester:{
-        type:String
+        type:String,
+        required:true
     },
+    status:{
+        type:String,
+        default:"Student"
+    },
+    posts:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Post'
+        }
+    ],
     subjects:[
         {
             type:mongoose.Schema.Types.ObjectId,

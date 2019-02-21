@@ -4,6 +4,7 @@ const StudentSchema=require('../models/student');
 const AdminSchema=require('../models/student');
 const SubjectSchema=require('../models/subject');
 const adminValidation=require('../validation/adminValidation');
+const subjectValidation=require('../validation/subjectValidation');
 const fs=require('fs');
 
 const Router=express.Router();
@@ -156,21 +157,43 @@ Router.post('/update',upload.single('profileImage'),async(req,res)=>{
     
 })
 
+// Fetch Pending teacher Details
+Router.get('/pending/teachers',async(req,res)=>{
+    try {
+        const teachers=await TeacherSchema.find({'isAccepted':false});
+        return res.send(teachers);
+    } catch (error) {
+        return res.send(error);
+    }
+})
+
+// Fetch Pending student Details
+Router.get('/pending/students',async(req,res)=>{
+    try {
+        const students=await StudentSchema.find({'isAccepted':false});
+        return res.send(students);
+    } catch (error) {
+        return res.send(error);
+    }
+})
+
 // Create Subject
 Router.post('/subject/create',async(req,res)=>{
-    const {name,semester,fullMarks,passMarks,teacherId}=req.body;
+    const {error}=subjectValidation(req.body);
+    if(error) return res.send(error.details[0].message);
+
+    const {name,semester,description,fullMarks,passMarks,teacherId}=req.body;
     
     const subject = new SubjectSchema({
         name,
         semester,
         fullMarks,
         passMarks,
-        teacherId
+        teacherId,
+        description
     })
 
     try {
-        // const alreadyPresent=await SubjectSchema.findOne({'name':name.toLowerCase()});
-        // if(alreadyPresent) return res.send('Subject with that name already present');
         const teacher=await TeacherSchema.findById(teacherId);
         const result=await subject.save();
         teacher.subjects.push(result._id);
@@ -180,6 +203,42 @@ Router.post('/subject/create',async(req,res)=>{
         return res.status(400).send(error)
     }
 })
+
+// Update Subject
+Router.post('/subject/update',async(req,res)=>{
+
+
+    try {
+        const {name,semester,description,teacherId,subjectId}=req.body;
+        const subject=await SubjectSchema.findById(subjectId);
+        const oldTeacher=await TeacherSchema.findById(subject.teacherId);
+
+        console.log(oldTeacher);
+
+        // Update Subject Details
+        if(name) subject.name=name;
+        if(semester) subject.semester=semester;
+        if(description) subject.description=description;
+        
+        if(teacherId){
+            subject.teacherId=teacherId;
+            const index=oldTeacher.subjects.indexOf(subjectId);
+            oldTeacher.subjects.splice(index,1);
+        }
+
+        const teacher=await TeacherSchema.findById(teacherId);
+        const result=await subject.save();
+        teacher.subjects.push(result._id);
+
+        await oldTeacher.save();
+        await teacher.save();
+        return res.status(200).send(result);
+    } catch (error) {
+        return res.status(400).send(error)
+    }
+})
+
+
 
 // Fetch Subjects
 Router.get('/subjects',async(req,res)=>{

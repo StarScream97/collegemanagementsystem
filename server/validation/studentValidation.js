@@ -9,8 +9,7 @@ const schema=Joi.object().keys({
     age:Joi.number().integer(),
     address:Joi.string().required(),
     phone:Joi.number().integer().required(),
-    semester:Joi.number().integer().required(),
-    profileImage:Joi.string()
+    semester:Joi.number().integer().required()
 });
 
 const validator=function(student){

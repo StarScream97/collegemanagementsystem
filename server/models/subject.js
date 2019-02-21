@@ -7,6 +7,9 @@ const subject=new Schema({
         required:true,
         unique:true
     },
+    description:{
+        type:String
+    },
     semester:{
         type:String,
         required:true

@@ -6,6 +6,7 @@ const studentValidator=require('../validation/studentValidation');
 const fs=require('fs');
 
 
+
 const bcrypt=require('bcrypt-nodejs');
 
 const multer=require('multer');
@@ -38,13 +39,11 @@ const upload=multer({
 
 // Student Login
 Router.post('/login',async(req,res)=>{
-    const {email,password}=req.body;
-    
+    const {email,password}=req.body;    
     try {
-        const student=await StudentSchema.find({'email':email});        
+        const student=await StudentSchema.findOne({'email':email});        
         if(student){
             const passwordMatches=bcrypt.compareSync(password,student.password);
-            console.log(passwordMatches)
             if(passwordMatches){
                 return res.status(200).send(student);
             } else{
@@ -59,7 +58,7 @@ Router.post('/login',async(req,res)=>{
             })
         }
     } catch (error) {
-        
+        return res.send(error);
     }
 })
 
@@ -67,6 +66,7 @@ Router.post('/login',async(req,res)=>{
 Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
     const {name,email,password,phone,age,address,semester} = req.body;
     const profileImage=req.file;
+    
         
     const {error}=studentValidator(req.body);
     if(error) return res.send(error.details[0].message);

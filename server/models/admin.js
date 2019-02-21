@@ -30,6 +30,16 @@ const admin=new Schema({
     phone:{
         type:Number,
         required:true
-    }
+    },
+    status:{
+        type:String,
+        default:"Admin"
+    },
+    posts:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Post'
+        }
+    ]
 })
 module.exports= mongoose.model('Admin',admin);
