@@ -9,7 +9,7 @@
                     <div class="person-details">
                         <h6>{{person.email}}</h6>
                         <h5>{{person.name}}</h5>
-                        <div class="view-details">
+                        <div class="view-details" @click="studentProfile(person.email)">
                             <i class="fas fa-info-circle"></i>
                         </div>
                     </div>
@@ -26,7 +26,7 @@ import axios from 'axios';
 
 
 export default {
-  name: "students",
+    name:'students',
   props: {
     msg: String
   },
@@ -36,6 +36,13 @@ export default {
   data() {
       return {
           students:[]
+      }
+  },
+  methods: {
+      studentProfile(email){
+        //   this.$router.push({name:'studentProfile',params:{email:email}});
+          this.$router.push({name:'studentProfile',params:{email}});
+
       }
   },
   computed:{

@@ -35,6 +35,7 @@ export default {
 <style scoped>
 
 .router-view{
+  margin-top: 7rem;
   max-width: 77vw;
   margin-left: auto;
 }

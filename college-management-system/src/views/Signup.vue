@@ -49,6 +49,17 @@
                                 <label for="semester">Semester</label>
                             </div>
                         </div>
+                         <div class="row radio-buttons">
+                            <label>
+                            <input type="radio" id="one" value="students" v-model="userType" checked>
+                                <span>Student</span>
+                            </label>
+                            <label>
+                            <input type="radio" id="two" value="teachers" v-model="userType" checked>
+                                <span>Teacher</span>
+                            </label>
+                            
+                        </div>
                         <a class="waves-effect waves-light btn-small" @click.prevent="signup">Signup</a>
                         <div class="login">
                             <h5>Already have an account?</h5>
@@ -77,7 +88,8 @@ export default {
           address:'',
           phone:'',
           semester:'',
-          profileImage:null
+          profileImage:null,
+          userType:''
       }
   },
   methods: {
@@ -85,7 +97,7 @@ export default {
           this.$router.push(link);
       },
       onFileChanged (event) {
-          console.log(event.target.files[0])
+        //   console.log(event.target.files[0])
         this.profileImage = event.target.files[0]
       },
       signup(){
@@ -102,19 +114,21 @@ export default {
   if(this.password!=='' && this.password===this.repeatPassword && this.email && this.age && this.address && this.phone){
     axios({
         method: 'post',
-        url: 'http://localhost:3000/students/signup',
+        url: `http://localhost:3000/${this.userType}/signup`,
         data: formData,
         config: { headers: {'Content-Type': 'multipart/form-data' }}
         })
         .then(function (res) {
             //handle success
-            this.$route.push('/');
-            // console.log(res.data.data);
+            // this.$route.push('/');
+            console.log(res.data);
         })
         .catch(function (err) {
             //handle error
             // console.log(err);
         });
+  }else{
+      alert('Please fill all the details');
   }
 
         //   if(this.password!=='' && this.password===this.repeatPassword && this.email && this.age && this.address && this.phone){
@@ -145,6 +159,7 @@ export default {
     .signup-wrapper{
         /* max-width: 50vw; */
         margin: 0 auto;
+        margin-top: -2rem;
     }
     form div{
         margin: 10px 0;

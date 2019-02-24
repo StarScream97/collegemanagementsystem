@@ -1,7 +1,6 @@
 <template>
   <div class="login">
     <!-- <Navbar /> -->
-    <!-- <Login> </Login> -->
     <div class="login-wrapper">
         <!-- <div class="row"> -->
           <form class="col s12">
@@ -17,11 +16,25 @@
                         <label for="password">Password</label>
                     </div>
                 </div>
-                <a class="waves-effect waves-light btn-small" @click.prevent="login">Login</a>           
+                <div class="row radio-buttons">
+                    <label>
+                       <input type="radio" id="one" value="students" v-model="userType" checked>
+                        <span>Student</span>
+                    </label>
+                     <label>
+                       <input type="radio" id="two" value="teachers" v-model="userType" checked>
+                        <span>Teacher</span>
+                    </label>
+                     <label>
+                       <input type="radio" id="three" value="admin" v-model="userType" checked>
+                        <span>Admin</span>
+                    </label>
+                </div>
+                <a href="#" class="waves-effect waves-light btn-small" @click.prevent="login">Login</a>           
 
                 <div class="signup">
                     <h5>Don't have an account?</h5>
-                    <a href="" @click="goTo('signup')">Sign Up</a>
+                    <a href="#" @click="goTo('signup')">Sign Up</a>
                 </div>
           </form>
        <!-- </div> -->
@@ -43,7 +56,8 @@ export default {
   data() {
       return {
           email:'',
-          password:''
+          password:'',
+          userType:''
       }
   },
   methods: {
@@ -51,15 +65,17 @@ export default {
           this.$router.push(link);
       },
       login(){
-        // console.log(this.email,this.password)
-
-        axios.post('http://localhost:3000/students/login',{
+        
+        axios.post(`http://localhost:3000/${this.userType}/login`,{
           email:this.email,
           password:this.password
         }).then(res=>{
-          // console.log(res);
+          // console.log(res.data);
           localStorage.setItem('user',JSON.stringify(res.data));
-          this.$router.push('/dashboard');
+          if(this.userType==='teachers' || this.userType==='students')
+            this.$router.push('/home');
+          else
+            this.$router.push('/dashboard');
         })
       }
   }
@@ -86,6 +102,12 @@ export default {
     }
     .input-field{
       margin-bottom: 1.2rem;
+    }
+    .radio-buttons label{
+      margin-right: 15px;
+    }
+    .radio-buttons span{
+      margin-left: -4px;
     }
     
 

@@ -58,15 +58,24 @@ Router.post('/',upload.single('postImage'),async(req,res)=>{
         const {error}=postValidation(req.body);
         if(error) return res.send(error.details[0].message);
 
-        const {title,body,postImage,authorId,onModel} =req.body;
+        const {title,body,postImage,authorId,onModel,postWithImage} =req.body;
 
+        // console.log(req.body)
+        let newPostImage=''
+        if(postWithImage)
+            newPostImage=req.file.path
+        else
+            newPostImage=''
+            
+
+        
 
         const post=new postSchema({
             title,
             body,
             authorId,
             onModel,
-            postImage:req.file.path
+            postImage:newPostImage
         });
 
         const result=await post.save();
@@ -74,7 +83,7 @@ Router.post('/',upload.single('postImage'),async(req,res)=>{
         return res.send(result);
 
     } catch (error) {
-        
+        return res.send(error)
     }
 });
 
@@ -124,11 +133,12 @@ Router.post('/update/',async(req,res)=>{
 })
 
 // Delete Post
-Router.delete('/delete/:postID',async(req,res)=>{
+Router.delete('/delete/:postId',async(req,res)=>{
     try {
-        const {postId}=req.body;
-        const post=await postSchema.findOneAndDelete(postId);
-        return res.send(post);
+        
+        const {postId}=req.params;
+        await postSchema.findByIdAndDelete(postId);
+        return res.send("Successfully Deleted");
     } catch (error) {
         return res.send(error);
     }

@@ -3,6 +3,8 @@ const TeacherSchema=require('../models/teacher');
 const StudentSchema=require('../models/student');
 const AdminSchema=require('../models/student');
 const SubjectSchema=require('../models/subject');
+const PostSchema=require('../models/post');
+
 const adminValidation=require('../validation/adminValidation');
 const subjectValidation=require('../validation/subjectValidation');
 const fs=require('fs');
@@ -41,38 +43,19 @@ const upload=multer({
 
 // Edit Teacher
 Router.post('/teachers/update',async(req,res)=>{
-    const {adminId,teacherId,salary,teachingExperience,isAccepted,adminPassword}=req.body;
-    const admin=await AdminSchema.findById(adminId);
-
-    if(admin){
-        const passwordMatched=bcrypt.compareSync(adminPassword,admin.password);
-        console.log(passwordMatched);
-        if(passwordMatched){
-            const teacher=await TeacherSchema.findById(teacherId);
-            teacher.salary=salary;
-            teacher.teachingExperience=teachingExperience;
-            teacher.isAccepted=isAccepted;
-
-            try {
-                const result=await teacher.save();
-                return res.status(200).send(result);
-            } catch (error) {
-                return res.send({error})
-            }
-
-        }else{
-            return res.send({
-                error:"The provided credentials do not match with our database"
-            })
-        }
-       
+    const {teacherId,salary,teachingExperience,isAccepted}=req.body;
+    try {
+        const teacher=await TeacherSchema.findById(teacherId);
+        teacher.salary=salary;
+        teacher.teachingExperience=teachingExperience;
+        teacher.isAccepted=isAccepted;
+        const result=await teacher.save();
+        return res.status(200).send(result);
+    } catch (error) {
+        return res.send(error)
     }
-    else{
-        return res.send({
-            error:"Cannot find anyone with that ID"
-        })
-    }
-})
+
+});
 
 
 // Admin Signup
@@ -177,6 +160,33 @@ Router.get('/pending/students',async(req,res)=>{
     }
 })
 
+// Admin Login
+Router.post('/login',async(req,res)=>{
+    const {email,password}=req.body;    
+    console.log(email)
+    try {
+        const admin=await AdminSchema.findOne({'email':email}); 
+        if(admin){
+            const passwordMatches=bcrypt.compareSync(password,admin.password);
+            if(passwordMatches){
+                return res.status(200).send(admin);
+            } else{
+                return res.status(400).send({
+                    error:"Invalid Credentials! Please try again"
+                })
+            }
+        }
+        else{
+            return res.status(400).send({
+                error:"Invalid Credentials! Please try again"
+            })
+        }
+    } catch (error) {
+        return res.send(error);
+    }
+})
+
+
 // Create Subject
 Router.post('/subject/create',async(req,res)=>{
     const {error}=subjectValidation(req.body);
@@ -262,6 +272,54 @@ Router.post('/teachers/accept/:teacherId',async(req,res)=>{
     }
 })
 
+
+// Accept Student Signup Request
+Router.post('/students/accept/:studentId',async(req,res)=>{
+    const student=await StudentSchema.findById(req.params.studentId);
+    if(student){
+        student.isAccepted=true;
+        try {
+            const result=await student.save();
+            return res.status(200).send(result);
+        } catch (error) {
+            return res.status(400).send({
+                error
+            })
+        }
+    }
+})
+
+
+// Dashboard Details
+Router.get('/dashboard',async(req,res)=>{
+    try {
+        const teachers=await TeacherSchema.find({});
+        const students=await StudentSchema.find({});
+        const posts=await PostSchema.find({});
+        const pendingStudents=await StudentSchema.find({'isAccepted':false});
+        const pendingTeachers=await TeacherSchema.find({'isAccepted':false});
+        const teacherSalary=await TeacherSchema.aggregate([
+            {$match:{}},
+            {$group : {
+                _id : null,
+                total : {
+                    $sum : "$salary"
+                }
+            }
+        }]);
+        return res.send({
+            teachers:teachers.length,
+            students:students.length,
+            posts:posts.length,
+            pendingStudents:pendingStudents.length,
+            pendingTeachers:pendingTeachers.length,
+            teacherSalary
+        })
+
+    } catch (error) {
+        return res.send(error);
+    }
+})
 
 
 module.exports=Router;

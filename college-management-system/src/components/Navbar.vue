@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="navbar">
       <nav class=" blue-grey darken-4">
         <div class="nav-wrapper max-container">
           <a href="#!" class="brand-logo"><i class="fab fa-drupal"></i><span>StarScream</span></a>
@@ -48,6 +48,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.navbar{
+  position: fixed;
+  top: 0;
+  z-index: 4;
+  width: 100vw;
+}
 .brand-logo{
   display: flex;
   align-items: center;

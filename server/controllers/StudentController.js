@@ -64,9 +64,14 @@ Router.post('/login',async(req,res)=>{
 
 // Add Student
 Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
-    const {name,email,password,phone,age,address,semester} = req.body;
-    const profileImage=req.file;
-    
+    const {name,email,password,phone,age,address,semester,profileImage} = req.body;
+    // const profileImage=req.file;
+    let newProfileImage='';
+
+    if(profileImage)
+        newProfileImage=req.file.path
+    else
+        newProfileImage=''
         
     const {error}=studentValidator(req.body);
     if(error) return res.send(error.details[0].message);
@@ -84,7 +89,7 @@ Router.post('/signup',upload.single('profileImage'),async(req,res)=>{
             name,
             email,
             password:hashedPassword,
-            profileImage:req.file.path,
+            profileImage:newProfileImage,
             age,
             address,
             phone,
@@ -113,12 +118,12 @@ Router.get('/',async(req,res)=>{
 
 
 // Fetch Single Student
-Router.get('/fetch/:id',async(req,res)=>{
-    const student=await StudentSchema.findById(req.params.id);
+Router.get('/fetch/:email',async(req,res)=>{
+    const student=await StudentSchema.findOne({'email':req.params.email});
     if(student){
         return res.status(200).send(student);
-    }
-    return res.status(400).send("Couldn't find the student with that Id");
+    }else
+        return res.status(400).send("Couldn't find the student with that Id");
 })
 
 

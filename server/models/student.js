@@ -36,8 +36,7 @@ const student=new Schema({
         default:false
     },
     semester:{
-        type:String,
-        required:true
+        type:String
     },
     status:{
         type:String,

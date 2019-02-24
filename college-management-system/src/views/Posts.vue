@@ -5,10 +5,10 @@
                 <div class="post z-depth-4 white-text  indigo darken-3" v-for="(post, index) in posts" :key="index">
                     <div class="post-img z-depth-2"><img :src="'http://localhost:3000/' + post.postImage" alt=""></div>
                     <div class="post-content">
-                        <p>Static Date: February 21</p>
+                        <div class="post-top"><p>Static Date: February 21</p><a href="#" @click.prevent="deletePost(post._id,index)">X</a></div>
                         <h5>{{post.title}}</h5>
                         <p>{{post.body}}</p>
-                        <a href="">Read More</a>
+                        <a href="#">Read More</a>
                     </div>
                 </div>
            <!-- </transition>             -->
@@ -28,6 +28,14 @@ export default {
             posts:[]
         }
     },
+    methods: {
+        deletePost(postId,index){
+            axios.delete(`http://localhost:3000/posts/delete/${postId}`).then(res=>{
+                
+                        this.$delete(this.posts, index)
+            })
+        }
+    },
     computed: {
         fetchPosts(){
             axios.get('http://localhost:3000/posts').then(res=>{
@@ -38,7 +46,7 @@ export default {
     },
     created(){
         this.fetchPosts;
-    }
+    },
 }
 </script>
 
@@ -51,6 +59,14 @@ export default {
     }
     p:first-child{
         color:#f5f5f5;
+    }
+    .post-top{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .post-top a{
+        color: white;
     }
     .posts-container{
         width: 80%;
@@ -78,20 +94,17 @@ export default {
         box-shadow: none;
         transition: all .7s;
     }
-    .post:hover .post-img img{
-        transform: scale(1.05);
-        transition: all .8s;
-    }
     .post-img{
-        width: 12rem;
-        height: 12rem;
+        max-height: 12rem;
+        max-width: 12rem;
         margin-left: -4rem;
         border-radius: 10px;
-        overflow: hidden;
     }
     .post-img img{
-        width: 100%;
-        height: 100%;
+        width: 12rem;
+        height: 12rem;
+
+        /* height: 100%; */
         transition: all .8s;
 
     }

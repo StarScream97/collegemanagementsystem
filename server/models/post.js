@@ -9,7 +9,8 @@ const post=new Schema({
         type:String
     },
     postImage:{
-        type:String
+        type:String,
+        default:''
     },
     postWithImage:{
         type:Boolean,

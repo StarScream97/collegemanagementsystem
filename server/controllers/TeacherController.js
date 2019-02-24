@@ -69,6 +69,18 @@ Router.post('/login', async (req, res) => {
 
 })
 
+// Delete Teacher
+Router.delete('/delete/:teacherId',async(req,res)=>{
+    try {
+        
+        const {teacherId}=req.params;
+        await postSchema.findByIdAndDelete(teacherId);
+        return res.send("Successfully Deleted");
+    } catch (error) {
+        return res.send(error);
+    }
+})
+
 // Signup new teacher
 Router.post('/signup', upload.single('profileImage'), async (req, res) => {
     let {

@@ -2,14 +2,14 @@
         <div class="teachers-container">
             <h5>All Teachers</h5>
             <div class="persons">
-                <div class="person z-depth-3" v-for="person in teachers" :key="person.index">
+                <div class="person z-depth-3" v-for="person in teachers" :key="person.index" >
                     <div class="person-image">
                         <img :src=" 'http://localhost:3000/' + person.profileImage" :alt="person.name + '-image'" class="responsive-image circle">
                     </div>
                     <div class="person-details">
                         <h6>{{person.email}}</h6>
                         <h5>{{person.name}}</h5>
-                        <div class="view-details">
+                        <div class="view-details" @click.prevent="teacherProfile(person.email)">
                             <i class="fas fa-info-circle"></i>
                         </div>
                     </div>
@@ -41,6 +41,11 @@ export default {
   computed:{
       fetchpersons(){
          
+      }
+  },
+  methods: {
+      teacherProfile(email){
+          this.$router.push({name:'teacherProfile',params:{email}});
       }
   },
   created(){
