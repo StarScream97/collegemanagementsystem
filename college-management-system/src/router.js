@@ -10,6 +10,8 @@ import Posts from './views/Posts.vue'
 import PendingRequests from './views/PendingRequests.vue'
 import CreatePost from './views/CreatePost.vue'
 import TeacherProfile from './views/TeacherProfile.vue'
+import StudentProfile from './views/StudentProfile.vue'
+import SinglePost from './views/SinglePost.vue'
 
 Vue.use(Router);
 
@@ -46,6 +48,16 @@ export default new Router({
       path:'/teachers/:email',
       name:'teacherProfile',
       component:TeacherProfile
+    },
+    {
+      path:'/students/:email',
+      name:'studentProfile',
+      component:StudentProfile
+    },
+    {
+      path:'/post/:postId',
+      name:'singlePost',
+      component:SinglePost
     },
     {
       path:'/students',

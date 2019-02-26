@@ -51,6 +51,16 @@ Router.get('/',async(req,res)=>{
     }
 })
 
+// Fetch Single Post
+Router.get('/:postId',async(req,res)=>{
+    try {
+        const post=await postSchema.findById(req.params.postId);
+        return res.send(post);
+    } catch (error) {
+        return res.send(error);
+    }
+})
+
 
 // Create a Post
 Router.post('/',upload.single('postImage'),async(req,res)=>{

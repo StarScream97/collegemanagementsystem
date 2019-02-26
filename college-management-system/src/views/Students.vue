@@ -4,7 +4,8 @@
             <div class="persons">
                 <div class="person z-depth-3" v-for="person in students" :key="person.index">
                     <div class="person-image">
-                        <img :src=" 'http://localhost:3000/' + person.profileImage" :alt="person.name + '-image'" class="responsive-image circle">
+                        <img v-if="person.profileImage" :src=" 'http://localhost:3000/' + person.profileImage" :alt="person.name + '-image'" class="responsive-image circle">
+                        <img v-else src="https://wallpaperplay.com/walls/full/2/c/4/277054.jpg" class="responsive-image circle" alt="">                
                     </div>
                     <div class="person-details">
                         <h6>{{person.email}}</h6>

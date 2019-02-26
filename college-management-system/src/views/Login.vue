@@ -65,14 +65,14 @@ export default {
           this.$router.push(link);
       },
       login(){
-        
+        console.log(this.userType)
         axios.post(`http://localhost:3000/${this.userType}/login`,{
           email:this.email,
           password:this.password
         }).then(res=>{
           // console.log(res.data);
           localStorage.setItem('user',JSON.stringify(res.data));
-          if(this.userType==='teachers' || this.userType==='students')
+          if(res.data.statuts==='Teacher' || res.data.status==='Student')
             this.$router.push('/home');
           else
             this.$router.push('/dashboard');

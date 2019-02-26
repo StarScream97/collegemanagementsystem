@@ -41,7 +41,7 @@
         <h5>{{pendingTeachers}}</h5>
       </div>
     </div>
-    <div class="board z-depth-3 yellow darken-4 white-text">
+    <div class="board z-depth-3  grey darken-3 white-text">
       <div class="board-title">
        <h6> Total Teacher Salary</h6>
       </div>
@@ -86,6 +86,17 @@ export default {
       console.log(err)
     })
   },
+  beforeRouteEnter (to, from, next) {
+    next(vm=>{
+
+      const user=JSON.parse(localStorage.getItem('user'));
+      // console.log(user)
+      if(user.status!=='Admin'){
+        // this.$router.push('/posts');
+        next('/posts');
+      }
+    })
+  }
 };
 </script>
 <style scoped>

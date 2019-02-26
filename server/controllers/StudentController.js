@@ -39,15 +39,19 @@ const upload=multer({
 
 // Student Login
 Router.post('/login',async(req,res)=>{
-    const {email,password}=req.body;    
+    const {email,password}=req.body;  
+    console.log(req.body)  
     try {
-        const student=await StudentSchema.findOne({'email':email});        
+        const student=await StudentSchema.findOne({'email':email}); 
+        console.log(student)       
         if(student){
             const passwordMatches=bcrypt.compareSync(password,student.password);
             if(passwordMatches){
-                return res.status(200).send(student);
+                console.log(student)
+                return res.send(student);
             } else{
-                return res.status(400).send({
+                console.log('password incorrect')
+                return res.send({
                     error:"Invalid Credentials! Please try again"
                 })
             }

@@ -72,7 +72,6 @@ Router.post('/login', async (req, res) => {
 // Delete Teacher
 Router.delete('/delete/:teacherId',async(req,res)=>{
     try {
-        
         const {teacherId}=req.params;
         await postSchema.findByIdAndDelete(teacherId);
         return res.send("Successfully Deleted");

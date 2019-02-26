@@ -1,8 +1,8 @@
 <template>
   <div class="signup-wrapper">
-      <div class="container">
-            <div class="row">
-                <form class="col s12" enctype="multipart/form-data" >
+    <div class="container">
+        <div class="row" 
+                <form class="col s12" enctype="multipart/form-data">
                         <div class="row">
                             <div class="input-field col s6">
                                 <input id="name" type="text" v-model="name">
@@ -44,9 +44,17 @@
                                 <input id="phone" type="text"  class="validate" v-model="phone">
                                 <label for="phone">Phone</label>
                             </div>
-                            <div class="input-field col s6">
+                            <div class="input-field col s6" v-if="userType==='students'">
                                 <input id="semester" type="text"  class="validate" v-model="semester">
                                 <label for="semester">Semester</label>
+                            </div>
+                            <div class="input-field col s6" v-if="userType==='teachers'">
+                                <input id="experience" type="text"  class="validate" v-model="teachingExperience">
+                                <label for="experience">Teaching Experience</label>
+                            </div>
+                             <div class="input-field col s6" v-if="userType==='teachers'">
+                                <input id="levelofstudy" type="text"  class="validate" v-model="levelOfStudy">
+                                <label for="levelofstudy">Level Of Study</label>
                             </div>
                         </div>
                          <div class="row radio-buttons">
@@ -67,6 +75,7 @@
                         </div>
                 </form>
         </div>
+
     </div>
   </div>
 </template>
@@ -89,7 +98,9 @@ export default {
           phone:'',
           semester:'',
           profileImage:null,
-          userType:''
+          userType:'',
+          teachingExperience:'',
+          levelOfStudy:''
       }
   },
   methods: {
@@ -107,9 +118,15 @@ export default {
           formData.set('email',this.email);
           formData.set('address',this.address);
           formData.set('phone',this.phone);
-          formData.set('semester',this.semester);
           formData.set('age',this.age);
           formData.set('profileImage',this.profileImage);
+
+          if(this.userType==='teachers'){
+              formData.set('teachingExperience',this.teachingExperience);
+              formData.set('levelOfStudy',this.levelOfStudy);
+          }else if(this.userType==='students'){
+            formData.set('semester',this.semester);
+          }
 
   if(this.password!=='' && this.password===this.repeatPassword && this.email && this.age && this.address && this.phone){
     axios({

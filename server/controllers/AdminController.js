@@ -57,6 +57,20 @@ Router.post('/teachers/update',async(req,res)=>{
 
 });
 
+Router.post('/students/update',async(req,res)=>{
+    const {studentId,semester}=req.body;
+    try {
+        const student=await StudentSchema.findById(studentId);
+        student.semester=semester;
+        // teacher.isAccepted=isAccepted;
+        const result=await student.save();
+        return res.status(200).send(result);
+    } catch (error) {
+        return res.send(error)
+    }
+
+});
+
 
 // Admin Signup
 Router.post('/signup',upload.single('profileImage'),async(req,res)=>{

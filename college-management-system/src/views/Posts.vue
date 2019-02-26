@@ -7,8 +7,8 @@
                     <div class="post-content">
                         <div class="post-top"><p>Static Date: February 21</p><a href="#" @click.prevent="deletePost(post._id,index)">X</a></div>
                         <h5>{{post.title}}</h5>
-                        <p>{{post.body}}</p>
-                        <a href="#">Read More</a>
+                        <p>{{post.body.slice(0,150)}}...</p>
+                        <a class="white-text" href="#" @click.prevent="viewPost(post._id)">Read More</a>
                     </div>
                 </div>
            <!-- </transition>             -->
@@ -34,6 +34,9 @@ export default {
                 
                         this.$delete(this.posts, index)
             })
+        },
+        viewPost(postId){
+            this.$router.push({name:'singlePost',params:{postId}});
         }
     },
     computed: {
@@ -56,6 +59,7 @@ export default {
     }
     h5{
         font-weight: 600;
+        margin-top: -.2rem;
     }
     p:first-child{
         color:#f5f5f5;

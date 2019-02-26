@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <!-- <Navbar /> -->
+    This is your home
   </div>
 </template>
 
